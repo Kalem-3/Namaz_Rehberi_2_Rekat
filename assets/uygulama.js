@@ -193,13 +193,8 @@ function abdestKaresi(n) {
 
 /* ---------- Ekranlar ---------- */
 function anaSayfa() {
-  const devam = (() => {
-    const n = parseInt(oku('namaz_son_namaz', ''), 10), a = parseInt(oku('namaz_son_abdest', ''), 10);
-    const son = oku('namaz_son', '');
-    if (son === 'namaz' && n > 0) return { href: `#/namaz/${n + 1}`, ad: '2 Rekât Namaz', adim: `Adım ${n + 1} / ${R.NAMAZ.length} · ${R.NAMAZ[n].ad}` };
-    if (son === 'abdest' && a > 0) return { href: `#/abdest/${a + 1}`, ad: 'Abdest', adim: `Adım ${a + 1} / ${R.ABDEST.length} · ${R.ABDEST[a].ad}` };
-    return null;
-  })();
+  /* Kaldığı yerden devam özelliği kaldırıldı: ana sayfa her zaman baştan başlar. */
+  const devam = null;
   return `<main class="ekran ana" id="icerik">
     <header class="ana-bas">
       <div><h1 class="dev-baslik">Namaz Rehberi</h1><p class="altin-alt">Adım Adım Öğrenin</p></div>
@@ -470,11 +465,8 @@ function ciz(animasyon = true) {
     hedef?.classList.add('gir-' + yon);
   }
   if (r.i !== undefined) {
-    yaz('namaz_son', r.tur);
-    yaz('namaz_son_' + r.tur, String(r.i));
     onPreload(r.tur, r.i + 1);
   }
-  if (r.bitti) { yaz('namaz_son', ''); }
   onceki = { tur: r.tur, i: r.i ?? -1 };
   Ses.hazirla(app);
   if (animasyon) {
@@ -571,5 +563,8 @@ app.addEventListener('touchend', e => {
   else { const g = $('.alt-cubuk .yuvarlak'); if (g && !g.classList.contains('pasif')) g.click(); }
 }, { passive: true });
 
+/* Her açılışta baştan: eski "kaldığı yer" kayıtları silinir; adres bir adımı gösteriyorsa ana sayfa açılır. */
+try { Object.keys(localStorage).filter(k => k.startsWith('namaz_son')).forEach(k => localStorage.removeItem(k)); } catch (e) {}
+if (/^#\/?[a-z]+\/(\d+|bitti)/.test(location.hash)) history.replaceState(null, '', location.pathname + location.search + '#/');
 ciz();
 })();
